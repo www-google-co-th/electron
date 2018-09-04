@@ -6,6 +6,7 @@
 
 #include "atom/common/api/api_messages.h"
 #include "atom/common/api/atom_bindings.h"
+#include "atom/common/native_mate_converters/file_path_converter.h"
 #include "atom/common/native_mate_converters/string16_converter.h"
 #include "atom/common/native_mate_converters/value_converter.h"
 #include "atom/common/node_bindings.h"
@@ -20,8 +21,8 @@
 #include "chrome/renderer/printing/print_web_view_helper.h"
 #include "content/public/renderer/render_frame.h"
 #include "native_mate/dictionary.h"
-#include "third_party/blink/public/web/web_document.h"
 #include "third_party/blink/public/web/blink.h"
+#include "third_party/blink/public/web/web_document.h"
 
 #include "atom/common/node_includes.h"
 #include "atom_natives.h"  // NOLINT: This file is generated with js2c
@@ -157,6 +158,7 @@ void AtomSandboxedRendererClient::InitializeBindings(
   b.SetMethod("getCPUUsage", base::Bind(&AtomBindings::GetCPUUsage,
                                         base::Unretained(metrics_.get())));
   b.SetMethod("getIOCounters", &AtomBindings::GetIOCounters);
+  b.SetMethod("takeHeapSnapshot", &AtomBindings::TakeHeapSnapshot);
 
   // Pass in CLI flags needed to setup the renderer
   base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();

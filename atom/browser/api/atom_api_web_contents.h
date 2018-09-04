@@ -434,6 +434,9 @@ class WebContents : public mate::TrackableObject<WebContents>,
                            const std::string& channel,
                            const base::ListValue& args);
 
+  void OnCreateHeapSnapshotFile(content::RenderFrameHost* frame_host,
+                                IPC::Message* message);
+
   // Called when received a synchronous message from renderer to
   // set temporary zoom level.
   void OnSetTemporaryZoomLevel(content::RenderFrameHost* frame_host,

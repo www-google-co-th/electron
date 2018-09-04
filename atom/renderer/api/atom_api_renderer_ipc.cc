@@ -17,8 +17,6 @@ using content::RenderFrame;
 
 namespace atom {
 
-namespace api {
-
 RenderFrame* GetCurrentRenderFrame() {
   WebLocalFrame* frame = WebLocalFrame::FrameForCurrentContext();
   if (!frame)
@@ -26,6 +24,8 @@ RenderFrame* GetCurrentRenderFrame() {
 
   return RenderFrame::FromWebFrame(frame);
 }
+
+namespace api {
 
 void Send(mate::Arguments* args,
           const std::string& channel,

@@ -1,6 +1,7 @@
 'use strict'
 
 const assert = require('assert')
+const fs = require('fs')
 const http = require('http')
 const path = require('path')
 const { closeWindow } = require('./window-helpers')
@@ -797,6 +798,50 @@ describe('webContents module', () => {
         })
       })
       w.loadURL('about:blank')
+    })
+  })
+
+  describe('takeHeapSnapshot()', () => {
+    let filePath
+
+    beforeEach(() => {
+      filePath = null
+    })
+
+    afterEach(done => {
+      if (filePath) {
+        fs.unlink(filePath, () => done())
+      }
+      filePath = null
+    })
+
+    it('works with non-sandboxed renderers', async () => {
+      w.destroy()
+      w = new BrowserWindow({
+        show: false
+      })
+
+      w.loadURL('about:blank')
+      await emittedOnce(w.webContents, 'did-finish-load')
+
+      filePath = await w.webContents.takeHeapSnapshot()
+      expect(filePath).to.be.a('string')
+    })
+
+    it('works with sandboxed renderers', async () => {
+      w.destroy()
+      w = new BrowserWindow({
+        show: false,
+        webPreferences: {
+          sandbox: true
+        }
+      })
+
+      w.loadURL('about:blank')
+      await emittedOnce(w.webContents, 'did-finish-load')
+
+      filePath = await w.webContents.takeHeapSnapshot()
+      expect(filePath).to.be.a('string')
     })
   })
 })

@@ -5,26 +5,12 @@
 #include "atom/common/api/remote_object_freer.h"
 
 #include "atom/common/api/api_messages.h"
+#include "atom/renderer/api/atom_api_renderer_ipc.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/values.h"
 #include "content/public/renderer/render_frame.h"
-#include "third_party/blink/public/web/web_local_frame.h"
-
-using blink::WebLocalFrame;
 
 namespace atom {
-
-namespace {
-
-content::RenderFrame* GetCurrentRenderFrame() {
-  WebLocalFrame* frame = WebLocalFrame::FrameForCurrentContext();
-  if (!frame)
-    return nullptr;
-
-  return content::RenderFrame::FromWebFrame(frame);
-}
-
-}  // namespace
 
 // static
 void RemoteObjectFreer::BindTo(v8::Isolate* isolate,

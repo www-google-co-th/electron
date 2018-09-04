@@ -1459,6 +1459,14 @@ Returns `Integer` - The Chromium internal `pid` of the associated renderer. Can
 be compared to the `frameProcessId` passed by frame specific navigation events
 (e.g. `did-frame-navigate`)
 
+#### `contents.takeHeapSnapshot()`
+
+Returns `Promise` - The file path of the saved V8 heap snapshot.
+
+Takes a V8 heap snapshot and saves it to the userData directory.
+The promise resolves with the file path of the saved file.
+The promise will be rejected in case of failure.
+
 ### Instance Properties
 
 #### `contents.id`

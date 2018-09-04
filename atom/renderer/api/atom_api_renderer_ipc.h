@@ -10,7 +10,13 @@
 #include "base/values.h"
 #include "native_mate/arguments.h"
 
+namespace content {
+class RenderFrame;
+}
+
 namespace atom {
+
+content::RenderFrame* GetCurrentRenderFrame();
 
 namespace api {
 

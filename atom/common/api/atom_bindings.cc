@@ -8,16 +8,22 @@
 #include <iostream>
 #include <string>
 
+#include "atom/common/api/api_messages.h"
+#include "atom/common/api/heap_snapshot_output_stream.h"
 #include "atom/common/api/locker.h"
 #include "atom/common/atom_version.h"
 #include "atom/common/chrome_version.h"
+#include "atom/common/native_mate_converters/file_path_converter.h"
 #include "atom/common/native_mate_converters/string16_converter.h"
 #include "atom/common/node_includes.h"
+#include "atom/renderer/api/atom_api_renderer_ipc.h"
 #include "base/logging.h"
 #include "base/process/process_info.h"
 #include "base/process/process_metrics_iocounters.h"
 #include "base/sys_info.h"
+#include "content/public/renderer/render_frame.h"
 #include "native_mate/dictionary.h"
+#include "v8/include/v8-profiler.h"
 
 namespace atom {
 
@@ -60,6 +66,7 @@ void AtomBindings::BindTo(v8::Isolate* isolate, v8::Local<v8::Object> process) {
   dict.SetMethod("getCPUUsage", base::Bind(&AtomBindings::GetCPUUsage,
                                            base::Unretained(metrics_.get())));
   dict.SetMethod("getIOCounters", &GetIOCounters);
+  dict.SetMethod("takeHeapSnapshot", &TakeHeapSnapshot);
 #if defined(OS_POSIX)
   dict.SetMethod("setFdLimit", &base::SetFdLimit);
 #endif
@@ -236,6 +243,55 @@ v8::Local<v8::Value> AtomBindings::GetIOCounters(v8::Isolate* isolate) {
   }
 
   return dict.GetHandle();
+}
+
+// static
+base::FilePath AtomBindings::TakeHeapSnapshot(v8::Isolate* isolate,
+                                              mate::Arguments* args) {
+  base::ThreadRestrictions::ScopedAllowIO allow_io;
+
+  auto file_path = HeapSnapshotOutputStream::GetFilePath();
+
+  base::File file(file_path,
+                  base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+
+  if (!file.IsValid()) {
+    auto* render_frame = GetCurrentRenderFrame();
+    if (!render_frame) {
+      args->ThrowError("takeHeapSnapshot failed");
+      return base::FilePath();
+    }
+
+    IPC::PlatformFileForTransit file_handle;
+    auto* message = new AtomFrameHostMsg_CreateHeapSnapshotFile(
+        render_frame->GetRoutingID(), &file_path, &file_handle);
+
+    if (!render_frame->Send(message)) {
+      args->ThrowError("takeHeapSnapshot failed");
+      return base::FilePath();
+    }
+
+    file = IPC::PlatformFileForTransitToFile(file_handle);
+  }
+
+  if (!file.IsValid()) {
+    args->ThrowError("takeHeapSnapshot failed - cannot create file");
+    return base::FilePath();
+  }
+
+  auto* snap = isolate->GetHeapProfiler()->TakeHeapSnapshot();
+
+  HeapSnapshotOutputStream stream(&file);
+  snap->Serialize(&stream, v8::HeapSnapshot::kJSON);
+
+  const_cast<v8::HeapSnapshot*>(snap)->Delete();
+
+  if (!stream.IsComplete()) {
+    args->ThrowError("takeHeapSnapshot failed - snapshot incomplete");
+    return base::FilePath();
+  }
+
+  return file_path;
 }
 
 }  // namespace atom

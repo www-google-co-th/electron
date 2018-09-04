@@ -1,4 +1,5 @@
 const { expect } = require('chai')
+const fs = require('fs')
 
 describe('process module', () => {
   describe('process.getCreationTime()', () => {
@@ -65,6 +66,14 @@ describe('process module', () => {
       expect(heapStats.mallocedMemory).to.be.a('number')
       expect(heapStats.peakMallocedMemory).to.be.a('number')
       expect(heapStats.doesZapGarbage).to.be.a('boolean')
+    })
+  })
+
+  describe('process.takeHeapSnapshot()', () => {
+    it('returns a file path', () => {
+      const filePath = process.takeHeapSnapshot()
+      expect(filePath).to.be.a('string')
+      fs.unlink(filePath, () => {})
     })
   })
 })
