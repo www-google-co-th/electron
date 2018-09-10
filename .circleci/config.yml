@@ -19,6 +19,26 @@ notify-slack-success: &notify-slack-success
       fi
     when: on_success
 
+run-arm-qemu-test: &run-arm-qemu-test
+  run:
+    name: Test in qemu
+    command: |
+      docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      (cd /tmp/workspace; unzip -o dist.zip)
+      docker run -it \
+        --mount "type=bind,source=/tmp/workspace,target=/workspace" \
+        --mount "type=bind,source=$HOME/project,target=/src" \
+        --rm \
+        "${ARM_DOCKER_IMAGE}" \
+        /bin/bash /src/tools/run-electron.sh \
+        | tee version.txt
+      if grep -q "$(script/get-version.py)" version.txt; then
+        echo "Versions match"
+      else
+        echo "Versions do not match"
+        exit 1
+      fi
+
 build-steps: &build-steps
   steps:
     - run:
@@ -135,6 +155,10 @@ build-steps: &build-steps
         path: src/out/ffmpeg/libffmpeg.so
     - store_artifacts:
         path: src/out/native_mksnapshot/mksnapshot
+    - persist_to_workspace:
+        root: src/out/Default
+        paths:
+          - dist.zip
 
 mac-build-steps: &mac-build-steps
   steps:
@@ -289,8 +313,19 @@ jobs:
       GN_EXTRA_ARGS: 'target_cpu = "arm"'
       GCLIENT_EXTRA_ARGS: '--custom-var=checkout_arm=True'
       RUN_TESTS: false
+      RUN_ARM_TESTS: true
     <<: *linux-build-machine
     <<: *build-steps
+
+  electron-linux-arm-test:
+    machine: true
+    environment:
+      ARM_DOCKER_IMAGE: electronbuilds/electronarm7:0.0.5
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - checkout
+      - *run-arm-qemu-test
 
   electron-linux-arm-release:
     environment:
@@ -298,6 +333,7 @@ jobs:
       GN_EXTRA_ARGS: 'target_cpu = "arm"'
       GCLIENT_EXTRA_ARGS: '--custom-var=checkout_arm=True'
       RUN_TESTS: false
+      RUN_ARM_TESTS: true
       BUILD_FFMPEG: true
       BUILD_NATIVE_MKSNAPSHOT: true
       MKSNAPSHOT_TOOLCHAIN: //build/toolchain/linux:clang_arm
@@ -320,6 +356,7 @@ jobs:
       GN_EXTRA_ARGS: 'target_cpu = "arm64" fatal_linker_warnings = false enable_linux_installer = false'
       GCLIENT_EXTRA_ARGS: '--custom-var=checkout_arm64=True'
       RUN_TESTS: false
+      RUN_ARM_TESTS: true
     <<: *linux-build-machine
     <<: *build-steps
 
@@ -329,12 +366,23 @@ jobs:
       GN_EXTRA_ARGS: 'target_cpu = "arm64" fatal_linker_warnings = false enable_linux_installer = false'
       GCLIENT_EXTRA_ARGS: '--custom-var=checkout_arm64=True'
       RUN_TESTS: false
+      RUN_ARM_TESTS: true
       BUILD_FFMPEG: true
       BUILD_NATIVE_MKSNAPSHOT: true
       MKSNAPSHOT_TOOLCHAIN: //build/toolchain/linux:clang_arm64
       NIGHTLY_BUILD: true
     <<: *linux-build-machine
     <<: *build-steps
+
+  electron-linux-arm64-test:
+    machine: true
+    environment:
+      ARM_DOCKER_IMAGE: electronbuilds/electronarm64:0.0.6
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - checkout
+      - *run-arm-qemu-test
 
   electron-osx-release:
     environment:
@@ -393,8 +441,14 @@ workflows:
       - electron-linux-ia32-testing
       - electron-linux-arm-debug
       - electron-linux-arm-testing
+      - electron-linux-arm-test:
+          requires:
+            - electron-linux-arm-testing
       - electron-linux-arm64-debug
       - electron-linux-arm64-testing
+      - electron-linux-arm64-test:
+          requires:
+            - electron-linux-arm64-testing
   build-mac:
     jobs:
       - electron-mas-debug
