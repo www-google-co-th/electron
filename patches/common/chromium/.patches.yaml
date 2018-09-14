@@ -207,10 +207,6 @@ patches:
   description: null
 -
   author: Aleksei Kuzmin <alkuzmin@microsoft.com>
-  file: export_blink_webdisplayitemlist.patch
-  description: null
--
-  author: Aleksei Kuzmin <alkuzmin@microsoft.com>
   file: statically_build_power_save_blocker.patch
   description: null
 -

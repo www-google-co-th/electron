@@ -1,5 +1,5 @@
 diff --git a/ui/latency/BUILD.gn b/ui/latency/BUILD.gn
-index 2aeebd991ae3..27cacb8748c4 100644
+index e9314a152362..fd30cc24af29 100644
 --- a/ui/latency/BUILD.gn
 +++ b/ui/latency/BUILD.gn
 @@ -5,7 +5,7 @@
@@ -11,7 +11,7 @@ index 2aeebd991ae3..27cacb8748c4 100644
    sources = [
      "fixed_point.cc",
      "fixed_point.h",
-@@ -18,6 +18,7 @@ jumbo_source_set("latency") {
+@@ -20,6 +20,7 @@ jumbo_source_set("latency") {
      "latency_tracker.h",
      "stream_analyzer.cc",
      "stream_analyzer.h",
@@ -19,7 +19,7 @@ index 2aeebd991ae3..27cacb8748c4 100644
      "windowed_analyzer.cc",
      "windowed_analyzer.h",
    ]
-@@ -22,6 +23,8 @@ jumbo_source_set("latency") {
+@@ -32,6 +33,8 @@ jumbo_source_set("latency") {
    public_deps = [
      "//services/metrics/public/cpp:metrics_cpp",
    ]
@@ -29,10 +29,10 @@ index 2aeebd991ae3..27cacb8748c4 100644
  
  jumbo_source_set("test_support") {
 diff --git a/ui/latency/latency_info.h b/ui/latency/latency_info.h
-index d9d390861562..7b1aa99e8a9c 100644
+index 43c61c8b9a4b..0acfdb344552 100644
 --- a/ui/latency/latency_info.h
 +++ b/ui/latency/latency_info.h
-@@ -16,6 +16,7 @@
+@@ -17,6 +17,7 @@
  #include "base/time/time.h"
  #include "services/metrics/public/cpp/ukm_source_id.h"
  #include "ui/gfx/geometry/point_f.h"
@@ -40,7 +40,7 @@ index d9d390861562..7b1aa99e8a9c 100644
  
  #if !defined(OS_IOS)
  #include "ipc/ipc_param_traits.h"  // nogncheck
-@@ -114,7 +115,7 @@ enum SourceEventType {
+@@ -123,7 +124,7 @@ enum SourceEventType {
    SOURCE_EVENT_TYPE_LAST = OTHER,
  };
  
@@ -48,14 +48,14 @@ index d9d390861562..7b1aa99e8a9c 100644
 +class UI_LATENCY_EXPORT LatencyInfo {
   public:
    struct LatencyComponent {
-     // Nondecreasing number that can be used to determine what events happened
+     // Average time of events that happened in this component.
 diff --git a/ui/latency/latency_tracker.h b/ui/latency/latency_tracker.h
-index 24397fc4ba6d..ad943fa7ccf7 100644
+index 4c62633f39ad..2513bac665f8 100644
 --- a/ui/latency/latency_tracker.h
 +++ b/ui/latency/latency_tracker.h
-@@ -8,12 +8,13 @@
+@@ -7,12 +7,13 @@
+ 
  #include "base/macros.h"
- #include "services/metrics/public/cpp/ukm_source_id.h"
  #include "ui/latency/latency_info.h"
 +#include "ui/latency/ui_latency_export.h"
  
@@ -66,11 +66,11 @@ index 24397fc4ba6d..ad943fa7ccf7 100644
 -class LatencyTracker {
 +class UI_LATENCY_EXPORT LatencyTracker {
   public:
-   explicit LatencyTracker(bool metric_sampling,
-                           ukm::SourceId ukm_source_id = ukm::kInvalidSourceId);
+   LatencyTracker();
+   ~LatencyTracker() = default;
 diff --git a/ui/latency/ui_latency_export.h b/ui/latency/ui_latency_export.h
 new file mode 100644
-index 0000000..f24ee91
+index 000000000000..a29f5be94bcd
 --- /dev/null
 +++ b/ui/latency/ui_latency_export.h
 @@ -0,0 +1,25 @@
