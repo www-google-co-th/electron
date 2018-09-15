@@ -104,13 +104,13 @@ content::WebContents* WebViewGuestDelegate::CreateNewGuestWindow(
   guest_params.initial_size =
       embedder_web_contents_->GetContainerBounds().size();
   guest_params.context = embedder_web_contents_->GetNativeView();
-  auto* guest_contents = content::WebContents::Create(guest_params);
+  std::unique_ptr<content::WebContents> guest_contents = content::WebContents::Create(guest_params);
   auto* guest_contents_impl =
-      static_cast<content::WebContentsImpl*>(guest_contents);
+      static_cast<content::WebContentsImpl*>(guest_contents.release());
   guest_contents_impl->GetView()->CreateViewForWidget(
       guest_contents->GetRenderViewHost()->GetWidget(), false);
 
-  return guest_contents;
+  return guest_contents_impl;
 }
 
 }  // namespace atom

@@ -322,9 +322,9 @@ void InspectableWebContentsImpl::ShowDevTools() {
       DevToolsEmbedderMessageDispatcher::CreateForDevToolsFrontend(this));
 
   if (!external_devtools_web_contents_) {  // no external devtools
-    managed_devtools_web_contents_.reset(
+    managed_devtools_web_contents_ =
         content::WebContents::Create(content::WebContents::CreateParams(
-            web_contents_->GetBrowserContext())));
+            web_contents_->GetBrowserContext()));
     managed_devtools_web_contents_->SetDelegate(this);
   }
 
