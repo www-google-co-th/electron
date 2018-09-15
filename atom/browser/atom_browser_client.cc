@@ -556,8 +556,7 @@ void AtomBrowserClient::RenderProcessReady(content::RenderProcessHost* host) {
 }
 
 void AtomBrowserClient::RenderProcessExited(content::RenderProcessHost* host,
-                                            base::TerminationStatus status,
-                                            int exit_code) {
+                                            const content::ChildProcessTerminationInfo& info) {
   auto host_pid = render_process_host_pids_.find(host->GetID());
   if (host_pid != render_process_host_pids_.end()) {
     if (delegate_) {

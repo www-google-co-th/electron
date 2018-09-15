@@ -163,9 +163,9 @@ class App : public AtomBrowserClient::Delegate,
   void BrowserChildProcessHostDisconnected(
       const content::ChildProcessData& data) override;
   void BrowserChildProcessCrashed(const content::ChildProcessData& data,
-                                  int exit_code) override;
+                                  const content::ChildProcessTerminationInfo& info) override;
   void BrowserChildProcessKilled(const content::ChildProcessData& data,
-                                 int exit_code) override;
+                                 const content::ChildProcessTerminationInfo& info) override;
 
  private:
   void SetAppPath(const base::FilePath& app_path);

@@ -121,8 +121,7 @@ class AtomBrowserClient : public brightray::BrowserClient,
   void RenderProcessHostDestroyed(content::RenderProcessHost* host) override;
   void RenderProcessReady(content::RenderProcessHost* host) override;
   void RenderProcessExited(content::RenderProcessHost* host,
-                           base::TerminationStatus status,
-                           int exit_code) override;
+                           const content::ChildProcessTerminationInfo& info) override;
   bool HandleExternalProtocol(
       const GURL& url,
       content::ResourceRequestInfo::WebContentsGetter web_contents_getter,
