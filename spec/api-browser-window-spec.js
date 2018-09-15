@@ -1286,6 +1286,21 @@ describe('BrowserWindow module', () => {
         })
         w.loadFile(path.join(fixtures, 'api', 'preload.html'))
       })
+      it('has access to blink APIs', (done) => {
+        const preload = path.join(fixtures, 'module', 'access-blink-apis.js')
+        ipcMain.once('answer', (event, test) => {
+          assert.strictEqual(test, true, 'should have access to window.Notification')
+          done()
+        })
+        w.destroy()
+        w = new BrowserWindow({
+          show: false,
+          webPreferences: {
+            preload: preload
+          }
+        })
+        w.loadFile(path.join(fixtures, 'api', 'preload.html'))
+      })
     })
 
     describe('session preload scripts', function () {
