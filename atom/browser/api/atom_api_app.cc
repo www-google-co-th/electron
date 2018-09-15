@@ -796,7 +796,7 @@ void App::BrowserChildProcessKilled(const content::ChildProcessData& data,
 }
 
 void App::RenderProcessReady(content::RenderProcessHost* host) {
-  ChildProcessLaunched(content::PROCESS_TYPE_RENDERER, host->GetHandle());
+  ChildProcessLaunched(content::PROCESS_TYPE_RENDERER, host->GetProcess().Handle());
 }
 
 void App::RenderProcessDisconnected(base::ProcessId host_pid) {
