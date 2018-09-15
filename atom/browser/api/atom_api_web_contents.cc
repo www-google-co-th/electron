@@ -639,20 +639,22 @@ content::KeyboardEventProcessingResult WebContents::PreHandleKeyboardEvent(
 }
 
 void WebContents::EnterFullscreenModeForTab(content::WebContents* source,
-                                            const GURL& origin) {
+                                            const GURL& origin,
+                                            const blink::WebFullscreenOptions& options) {
   auto* permission_helper =
       WebContentsPermissionHelper::FromWebContents(source);
   auto callback = base::Bind(&WebContents::OnEnterFullscreenModeForTab,
-                             base::Unretained(this), source, origin);
+                             base::Unretained(this), source, origin, options);
   permission_helper->RequestFullscreenPermission(callback);
 }
 
 void WebContents::OnEnterFullscreenModeForTab(content::WebContents* source,
                                               const GURL& origin,
+                                              const blink::WebFullscreenOptions& options,
                                               bool allowed) {
   if (!allowed)
     return;
-  CommonWebContentsDelegate::EnterFullscreenModeForTab(source, origin);
+  CommonWebContentsDelegate::EnterFullscreenModeForTab(source, origin, options);
   Emit("enter-html-full-screen");
 }
 

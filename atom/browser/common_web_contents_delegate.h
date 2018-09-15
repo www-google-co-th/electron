@@ -81,7 +81,8 @@ class CommonWebContentsDelegate
                           int request_id,
                           const base::FilePath& path) override;
   void EnterFullscreenModeForTab(content::WebContents* source,
-                                 const GURL& origin) override;
+                                 const GURL& origin,
+                                 const blink::WebFullscreenOptions& options) override;
   void ExitFullscreenModeForTab(content::WebContents* source) override;
   bool IsFullscreenForTabOrPending(
       const content::WebContents* source) const override;
